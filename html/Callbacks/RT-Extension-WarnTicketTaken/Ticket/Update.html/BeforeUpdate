@@ -1,0 +1,31 @@
+<%init>
+
+if (exists $ARGSRef->{Action} && $ARGSRef->{Action} eq 'Respond') {
+    my $owner_id   = $TicketObj->Owner;
+    my $owner_name =  _get_user_name_by_id($owner_id);
+    my $user       =  $session{'CurrentUser'};
+
+    return if $owner_id == $user->Id;
+    return if $owner_name eq 'Nobody';
+
+    $$skip_update = 1;
+    my $msg = "User '$owner_name' owns this ticket. Please take it before responding.";
+
+    push(@$results, $msg);
+}
+
+sub _get_user_name_by_id {
+    my $id   = shift;
+    my $user = RT::User->new( $RT::SystemUser );
+    $user->Load( $id );
+    return $user->Name;
+}
+
+</%init>
+
+<%args>
+$ARGSRef     => undef
+$TicketObj   => undef
+$skip_update => undef
+$results     => undef
+</%args>
